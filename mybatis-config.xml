@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+    xmlns:tx="http://www.springframework.org/schema/tx"  
+    xmlns:context="http://www.springframework.org/schema/context"   
+    xmlns:aop="http://www.springframework.org/schema/aop"  
+    xmlns:mvc="http://www.springframework.org/schema/mvc"    
+    xsi:schemaLocation="http://www.springframework.org/schema/beans   
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd   
+    http://www.springframework.org/schema/tx   
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd  
+    http://www.springframework.org/schema/context  
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd  
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd  
+    http://www.springframework.org/schema/mvc  
+    http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">  
+
+	<!-- 自动扫描的包名 -->  
+    <context:component-scan base-package="business,framework" ></context:component-scan>  
+      
+    <!-- 默认的注解映射的支持 -->  
+    <mvc:annotation-driven />  
+    
+    <!-- 拦截器配置 -->  
+    <mvc:interceptors>  
+      <!-- session超时拦截 -->  
+      <mvc:interceptor>  
+        <mvc:mapping path="/**"/>  
+        <bean class="framework.utils.interceptor.SessionTimeOutInterceptor">  
+          <property name="allowUrls">  
+            <list>  
+              <!-- 如果请求中包含以下路径，则不进行拦截 --> 
+              <value>/PDAapk</value>  
+              <value>/barcode</value>  
+              <value>/P04</value> 
+              <value>/P06</value> 
+              <value>/P07</value> 
+              <value>/P08</value> 
+              <value>/PCom</value> 
+              <value>/P99Com</value> 
+              <value>/BalePrint</value>
+              <value>/BoxLabelPrint</value>  
+              <value>/BoxLabelAllPrint</value>
+              <value>/ProdLabelPrint</value>  
+              <value>/language</value> 
+              <value>/login</value>
+              <value>/js</value>  
+              <value>/css</value>
+              <value>/fonts</value>   
+              <value>/upload</value>  
+              <value>/images</value>  
+            </list>  
+          </property>  
+        </bean>  
+      </mvc:interceptor>
+      <mvc:interceptor>  
+        <mvc:mapping path="/**"/>  
+        <bean class="framework.utils.interceptor.PDAInterceptor">  
+          <property name="allowUrls">  
+            <list>  
+              <!-- 如果请求中包含以下路径，则不进行拦截 -->  
+              <value>/PDAapk</value>  
+              <value>/barcode</value>  
+              <value>/P04</value> 
+              <value>/P06</value> 
+              <value>/P07</value> 
+              <value>/P08</value> 
+              <value>/PCom</value> 
+              <value>/P99Com</value> 
+              <value>/BalePrint</value>
+              <value>/BoxLabelPrint</value>  
+              <value>/ProdLabelPrint</value>  
+            </list>  
+          </property>  
+        </bean>  
+      </mvc:interceptor>
+
+    </mvc:interceptors>       
+ 	
+    <!-- 国际化 -->  
+    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+	    <property name="basenames">  
+	        <list>  
+	        <value>/WEB-INF/resource/Messages</value>
+	        <value>/WEB-INF/resource/Controls</value>
+	       </list>  
+	    </property>    
+	    <!--刷新资源文件的周期，以秒为单位-->
+	    <property name="cacheSeconds" value="5"/>  
+    </bean>     	   
+
+    <mvc:interceptors>  
+    <!-- 国际化操作拦截器 如果采用基于（请求/Session/Cookie）则必需配置 --> 
+    <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />  
+	</mvc:interceptors>  
+	<!-- 在session中保存国际化选择 -->    
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />	
+	
+	<!-- SpringMVC上传文件时，需要配置MultipartResolver处理器 -->  
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+        <property name="defaultEncoding" value="UTF-8"/>  
+        <!-- 内存缓存1M -->  
+        <property name="maxInMemorySize" value="1000000"></property> 
+    </bean>  
+    
+	<!-- log日志 -->
+	<aop:aspectj-autoproxy />
+ 	<aop:config>
+		<aop:pointcut expression="execution(* business.*.controller.*.*(..))"
+			id="myPointcut" />
+		<aop:aspect id="dd" ref="logAdvice">
+			<aop:before method="doBefore" pointcut-ref="myPointcut" />
+			<aop:after-returning method="doAfterReturn"
+				returning="returnObj" pointcut-ref="myPointcut" />
+		</aop:aspect>
+	</aop:config>
+ 	<aop:config>
+		<aop:pointcut expression="execution(* business.*.dao.*Dao.*(..))"
+			id="sqlResultPointcut" />
+		<aop:aspect  ref="sqlResultLogAdvice">
+			<aop:after-returning method="doAfterReturn" 
+				returning="returnObj"  pointcut-ref="sqlResultPointcut" />
+		</aop:aspect>
+	</aop:config> 
+
+	
+	<!-- 数据库和事务配置 -->
+
+    <!-- 加载配置文件 -->
+    <context:property-placeholder location="classpath:common.properties" />
+    <!-- 定义数据源 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+        destroy-method="close">
+        <property name="driverClass">
+            <value>${jdbc.driverClass}</value>
+        </property>
+        <property name="jdbcUrl">
+            <value>${jdbc.url}</value>
+        </property>
+        <property name="user">
+            <value>${jdbc.username}</value>
+        </property>
+        <property name="password">
+            <value>${jdbc.password}</value>
+        </property>
+        <!--连接池中保留的最小连接数。 -->
+        <property name="minPoolSize">
+            <value>${c3p0.minPoolSize}</value>
+        </property>
+        <!--连接池中保留的最大连接数。Default: 15 -->
+        <property name="maxPoolSize">
+            <value>${c3p0.maxPoolSize}</value>
+        </property>
+        <!--初始化时获取的连接数，取值应在minPoolSize与maxPoolSize之间。Default: 3 -->
+        <property name="initialPoolSize">
+            <value>${c3p0.initialPoolSize}</value>
+        </property>
+        <!--每30秒检查所有连接池中的空闲连接。Default: 0 -->
+        <property name="idleConnectionTestPeriod">
+            <value>${c3p0.idleConnectionTestPeriod}</value>
+        </property>
+    </bean>
+    
+    <!-- spring整合Mybatis基本设置 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">  
+    <property name="dataSource" ref="dataSource" />  
+    <property name="configLocation" value="/WEB-INF/mybatis-config.xml"></property>  
+	</bean>  
+	
+	<!-- spring整合Mybatis方式(三选一) -->
+	<!-- 使用SqlSessionTemplate方式(需要Dao接口实现类可进行细微控制)复杂业务推荐 -->
+	<bean id="sqlSession"  class="org.mybatis.spring.SqlSessionTemplate">   
+    	<constructor-arg index="0" ref="sqlSessionFactory" />   
+    </bean>  
+    
+	<!-- 使用数据映射器（MapperFactoryBean）方式(无需Dao接口实现类，自动映射) -->
+	<!-- <bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">  
+	    <property name="mapperInterface" value="com.haiersoft.hics.web.demo.dao.UserDao"></property>  
+	    <property name="sqlSessionFactory" ref="sqlSessionFactory"></property>  
+	</bean>   -->
+	
+	<!-- 使用MapperScannerConfigurer方式(无需Dao接口实现类，自动映射) -->
+	<!-- <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">  
+  		<property name="basePackage" value=com.haiersoft.hics.web.xxx.xxx.dao" />  
+	</bean> -->  
+    
+    <!-- 定义事务管理器 -->
+    <bean id="transactionManager"
+        class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource">
+            <ref bean="dataSource" />
+        </property>
+    </bean>
+    
+    <!-- 支持注解式事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>

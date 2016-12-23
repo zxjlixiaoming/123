@@ -1,0 +1,60 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="business.master.dao">
+
+    <!--检索master全部信息 -->
+    <select id="selall"
+        resultType="business.master.entity.GYSK0230StaffEntity">
+        SELECT
+            ROW_NUMBER() OVER(ORDER BY KANRI_BANGOU) AS NUM
+            , MS_EMPLOYEE.JYUGYOIN_BANGOU
+            , MS_EMPLOYEE.SEIJ + MS_EMPLOYEE.MEIJ AS NAME
+            , GM_DEPARTMENT.DEPARTMENTNM
+            , MS_EMPLOYEE.GENYAKUSYOKU
+            , MS_EMPLOYEE.KANRI_BANGOU AS ZKEY
+        FROM
+            MS_EMPLOYEE
+        INNER JOIN
+            GM_DEPARTMENT 
+        ON MS_EMPLOYEE.DEPARTMENTCD = GM_DEPARTMENT.DEPARTMENTCD
+        WHERE
+            MS_EMPLOYEE.DEPARTMENTCD = GM_DEPARTMENT.DEPARTMENTCD 
+            AND MS_EMPLOYEE.KENGEN  <![CDATA[<> ]]>'0' 
+            AND MS_EMPLOYEE.DEPARTMENTSTARTDATE <![CDATA[<=]]> GETDATE() 
+            AND MS_EMPLOYEE.DEPARTMENTENDDATE <![CDATA[>=]]> GETDATE()  
+            AND GM_DEPARTMENT.DELFLG = '0' 
+            AND MS_EMPLOYEE.DELFLG = '0' 
+        ORDER BY
+            MS_EMPLOYEE.JYUGYOIN_BANGOU ASC
+    </select>
+    
+        <select id="sellist"
+            parameterType="business.master.entity.GYSK0230StaffParamenter"
+            resultType="business.master.entity.GYSK0230StaffEntity">
+        SELECT
+            ROW_NUMBER() OVER(ORDER BY KANRI_BANGOU) AS NUM
+            , MS_EMPLOYEE.JYUGYOIN_BANGOU
+            , MS_EMPLOYEE.SEIJ + MS_EMPLOYEE.MEIJ AS NAME
+            , GM_DEPARTMENT.DEPARTMENTNM
+            , MS_EMPLOYEE.GENYAKUSYOKU
+            , MS_EMPLOYEE.KANRI_BANGOU AS ZKEY
+        FROM
+            MS_EMPLOYEE
+        INNER JOIN
+            GM_DEPARTMENT 
+        ON MS_EMPLOYEE.DEPARTMENTCD = GM_DEPARTMENT.DEPARTMENTCD
+        WHERE
+            1=1
+            
+            <if test="jyugyoin_bangou != null and jyugyoin_bangou != ''"> 
+                AND MS_EMPLOYEE.JYUGYOIN_BANGOU =  #{jyugyoin_bangou} 
+            </if>
+            <if test="seij != null and seij != ''"> 
+                AND MS_EMPLOYEE.SEIJ = #{seij} 
+            </if>
+            <if test="meij != null and meij != ''"> 
+                AND MS_EMPLOYEE.MEIJ = #{meij}  
+            </if>
+        ORDER BY
+            MS_EMPLOYEE.JYUGYOIN_BANGOU ASC
+    </select>
+</mapper>

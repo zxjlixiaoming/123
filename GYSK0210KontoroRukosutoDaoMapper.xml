@@ -1,0 +1,48 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="business.master.dao">
+
+    <!--检索master全部信息 -->
+    <select id="selectAll"
+        resultType="business.master.entity.GYSK0210KontoroRukosutoEntity">
+        SELECT 
+        	SHAINCD,
+			SHAINNM,
+			CONST,
+			CREATEUSER,
+			CONVERT(VARCHAR(12) , CREATETIME, 111 ) AS CREATETIME,
+			UPDATEUSER,
+			CONVERT(VARCHAR(12) , UPDATETIME, 111 ) AS UPDATETIME
+        FROM dbo.M_CONST
+        ORDER BY SHAINCD ASC
+    </select>
+
+	<!-- 更新数据 -->
+	<update id="updateItem" parameterType="business.master.entity.GYSK0210KontoroRukosutoEntity">
+        UPDATE dbo.M_CONST
+        SET
+            CONST = #{CONST},
+            UPDATEUSER = #{UPDATEUSER},
+            UPDATETIME = getdate()
+        WHERE
+             SHAINCD = #{SHAINCD}
+    </update>
+    
+     <!-- 插入数据 -->
+    <insert id="insertItem" parameterType="business.master.entity.GYSK0210KontoroRukosutoEntity">
+        INSERT INTO dbo.M_CONST 
+			VALUES(
+			#{SHAINCD},
+			#{SHAINNM},
+			#{CONST},
+			#{CREATEUSER},
+			getdate(),
+			#{UPDATEUSER},
+			getdate()
+			)
+    </insert>
+    
+    <!-- 删除数据 -->
+    <delete id="deleteItem" parameterType="String">
+        DELETE FROM dbo.M_CONST WHERE SHAINCD = #{shayinCd} 
+    </delete>
+</mapper>

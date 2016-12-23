@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="business.master.dao">
+    <!--无条件检索所有信息 -->
+    
+    <select id="searchAllData"
+    	parameterType="business.master.entity.GYSK0230ShainSentakuEntity"
+        resultType="business.master.entity.GYSK0230ShainSentakuEntity">
+        select MJ.KANRIBANGOU, MJ.jyugyoinBangou as userId,MJ.sei as userFirstName,MJ.mei as userLastName,MJ.genyakusyoku as position,GD.departmentNM as department
+		,MJ.sei+MJ.mei as userName
+		from MS_JYUGYOIN as MJ ,GM_DEPARTMENT as GD 
+		where MJ.departmentEndDate='9999-12-31 00:00:00.000'
+ 		and MJ.departmentCD = GD.departmentCD
+    </select>
+	<!--     有条件检索 -->
+        <select id="searchData"
+    	parameterType="business.master.entity.GYSK0230ShainSentakuEntity"
+        resultType="business.master.entity.GYSK0230ShainSentakuEntity">
+          select MJ.KANRIBANGOU, MJ.jyugyoinBangou as userId,MJ.sei as userFirstName,MJ.mei as userLastName,MJ.genyakusyoku as position,GD.departmentNM as department
+		,MJ.sei+MJ.mei as userName
+		from MS_JYUGYOIN as MJ ,GM_DEPARTMENT as GD 
+		where MJ.departmentEndDate='9999-12-31 00:00:00.000'
+ 		and MJ.departmentCD = GD.departmentCD
+		<if test="userId != null and userId != ''"> 
+        AND ME.jyugyoin_Bangou = #{userId}
+        </if>
+        <if test="userFirstName != null and userFirstName != ''"> 
+        AND ME.sei = #{userFirstName}
+        </if>
+        <if test="userLastName != null and userLastName != ''"> 
+        AND ME.mei = #{userLastName}
+        </if>
+        <if test="department != null and department != ''"> 
+        AND GD.departmentCD = #{department}
+        </if>  		
+    </select>
+    <select id="selAllDepartment" parameterType="business.common.entity.CommonEntity" resultType="business.common.entity.CommonEntity">
+   		select GD.departmentCD as value,
+		GD.departmentCD+':'+GD.departmentNM as name
+		from GM_DEPARTMENT as GD
+		where departmentLevel='0002'
+    </select>
+   <insert id="insertData" parameterType="business.master.entity.GYSK0230ShainSentakuEntity">
+
+		
+   		insert
+		into 
+		MS_JYUGYOIN
+		
+		(kanriBangou,
+		jyugyoinBangou,
+		mibunsyomeisyoBangou,
+		nyuusyaNengappi,
+		SEISYAINNENGAPPI,
+		departmentStartDate,
+		positionLevelCD,
+		noryokukeisu,
+		pasuwado,
+		kengen,
+		delFlg,
+		createUser,
+		createTime,
+		updateUser,
+		updateTime,
+		gakureki,
+		sotugyoGako,
+		tokyuu,
+
+		sei,
+		mei,
+		departmentCD,
+		genyakusyoku,
+		senmon,
+		departmentEndDate)
+		values
+		('K0235',
+		
+		 #{userId},
+		'123456789009876543',
+		'2006-02-10 00:00:00.000',
+		'1971-01-15 00:00:00.000',
+		'2006-02-10 00:00:00.000',
+		'02',
+		'1',
+		'123456',
+		'6',
+		'0',
+		'K00020',
+		'2009-01-01 00:00:00.000','K00020',
+		'2014-04-04 10:03:33.783',
+		'本科',
+		'山东大学',
+		'8',
+
+		#{userFirstName},
+		#{userLastName},
+		#{department},
+		'チーフ',
+		'计算机科学与技术',
+		'9999-12-31 00:00:00.000');
+   </insert>
+ 	<update id="updateData" parameterType="business.master.entity.GYSK0230ShainSentakuEntity">
+ 	update
+		MS_JYUGYOIN
+		set
+		sei=#{userFirstName},
+		mei=#{userLastName},
+		departmentCD=#{department}
+		where jyugyoinBangou = #{userId};
+	</update>
+	<delete id="deleteData" parameterType="business.master.entity.GYSK0230ShainSentakuEntity">
+	delete  from MS_JYUGYOIN where jyugyoinBangou = #{userId}
+	</delete>
+	<delete id="deleteData_1" parameterType="business.master.entity.GYSK0230ShainSentakuEntity">
+	delete  from MS_JYUGYOIN where jyugyoinBangou = #{userId}
+	</delete>
+</mapper>
+

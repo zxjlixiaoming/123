@@ -1,0 +1,42 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="business.master.dao">
+
+    <!--检索オーダー全部信息 -->
+    <select id="selOrderAll"
+        resultType="business.master.entity.GYSK0220OrderEntity"
+        parameterType="business.master.entity.GYSK0220OrderEntity">
+    SELECT MORDER.ORDERCD AS ORDERCD
+            ,MORDER.ORDERNM AS ORDERNM
+            ,GDEPARTMENT.DEPARTMENTNM AS DEPARTMENTNM
+            , MS_EMPLOYEE.SEIJ+MS_EMPLOYEE.MEIJ  AS NAME
+            , GDEPARTMENT.DEPARTMENTCD  AS DEPARTMENTCD  
+        FROM MS_ORDER AS MORDER
+        INNER JOIN MS_EMPLOYEE AS  MS_EMPLOYEE
+        ON MORDER.MANAGERID = MS_EMPLOYEE.KANRI_BANGOU 
+        INNER JOIN GM_DEPARTMENT AS GDEPARTMENT
+        ON GDEPARTMENT.DEPARTMENTCD=MORDER.DEPARTMENTCD
+        WHERE   MORDER.DELFLG = '0' 
+            AND  GDEPARTMENT.DELFLG ='0'
+            AND MORDER.FACTSTARTDATE <![CDATA[<=]]> GETDATE()
+            AND MORDER.FACTNOUHINDATE <![CDATA[>=]]> GETDATE()
+           <if test="txtOrderCD != null and txtOrderCD != ''"> 
+            AND MORDER.ORDERCD = #{txtOrderCD}
+           </if>
+           <if test="txtOrderNM != null and txtOrderNM != ''"> 
+            AND MORDER.ORDERNM  LIKE '%'+ #{txtOrderNM}+'%'
+           </if>
+           <if test="txtDepartmentCD != null and txtDepartmentCD != ''"> 
+            AND MORDER.DEPARTMENTCD= #{txtDepartmentCD}
+           </if>
+         ORDER BY MORDER.FACTSTARTDATE DESC
+    </select>
+    <!--检索部門全部信息 -->
+    <select id="selDepartment"
+        resultType="business.common.entity.CommonEntity">
+        SELECT DEPARTMENTCD AS value
+               ,DEPARTMENTCD+':'+DEPARTMENTNM AS name
+           FROM GM_DEPARTMENT AS GDEPARTMENT
+           WHERE 
+                DEPARTMENTLEVEL='0002'
+    </select>
+</mapper>
